@@ -1,0 +1,63 @@
+		//рекурсивный обход папки, путь которой передан и создания многомерного массива
+		//с информацией о её содержимом;
+		class FolderInfoGetter{
+			//возможно, есть встроенные функции для определения папка это, или файл,			
+			//но, так ведь не интересно :)			
+			//получаем массив с названием файла и его расширением, если
+			//это файл;
+			private function getFileInfo($path){
+				$regularExpression = '/(^|\/)([a-zа-я0-9\-\_\,\+]{1,50})\.([a-z]{2,10})$/im';
+				$result = preg_match($regularExpression,$path,$resInfo);
+				if ($result){
+					$fileInfo = array();
+					array_push($fileInfo,$resInfo[2]);
+					array_push($fileInfo,$resInfo[3]);
+					return $fileInfo;
+				}
+			}
+			//получаем название папки, если это папка;
+			private function getFolderName($path){
+				$regularExpression = '/(^|\/)([a-zа-я0-9\-\_\,\+]{1,50})$/im';
+				$result = preg_match($regularExpression,$path,$resInfo);
+				if ($result){
+					return $resInfo[2];
+				}
+			}
+			public function getFolderInfo($folderPath){
+				if (file_exists($folderPath)){
+					$folderContent = array();	
+					//получаем массив путей файлов или папок в данной папке;
+					$fileNames = scandir($folderPath);
+					//проходимся по массиву с целью проверки на файл или папку;
+					foreach ($fileNames as $key => $fileOrFolderName){		
+						//. и .. - левые значения в массиве, исключаем их;
+						if (($fileOrFolderName != '.') && ($fileOrFolderName != '..')){
+							//если это папка, запускаем для папки этот же метот рекурсивно;
+							//и возвращаемое значение добавляем в массив;
+							if ($this->getFolderName($fileOrFolderName)){
+								//добавляем в переданный в параметре путь название папки;
+								$newPath = $folderPath.'/'.$fileOrFolderName;
+								$folderContent[$fileOrFolderName] = $this->getFolderInfo($newPath);
+							}else if ($fileInfo = $this->getFileInfo($fileOrFolderName)){
+								//получаем полное имя файла;
+								//можно было сразу возвращать его в соответствующем методе;
+								$fullFileName = $fileInfo[0].'.'.$fileInfo[1];
+								//добавляем информацию о файле в массив;
+								$folderContent[$fullFileName] = true;
+							}
+						}						
+					}
+					if (!count($folderContent)){
+						$folderContent = 'пустая папка';
+					}	
+					return $folderContent;
+				}
+				return false;					
+			}
+		}
+		
+		$folderInfoGetter = new FolderInfoGetter();	
+		$result = $folderInfoGetter->getFolderInfo('testedFolder');	
+		$a = 1;
+	
+	
