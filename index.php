@@ -25,6 +25,7 @@
 	</head>	
 	<body>
 		<h1>Коммит 4</h1>			
+		<p>Слияние с веток DEV и master</p>
 				
 
 	</body>
